@@ -1,0 +1,12 @@
+{
+    "type": "record",
+    "name": "PagamentoEvento",
+    "namespace": "com.desafio.fraude",
+    "fields": [
+    { "name": "transacao_id", "type": "string" },
+    { "name": "cartao_id", "type": "string" },
+    { "name": "conta_id", "type": "string" },
+    { "name": "valor", "type": "double" },
+    { "name": "timestamp_transacao", "type": "string" }
+    ]
+}

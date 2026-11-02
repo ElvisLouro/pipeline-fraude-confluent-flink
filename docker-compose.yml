@@ -1,0 +1,17 @@
+
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_cdc
+    restart: always
+    environment:
+      POSTGRES_DB: pagamentos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+    ports:
+      - "5432:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"

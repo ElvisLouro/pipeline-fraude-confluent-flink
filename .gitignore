@@ -1,0 +1,8 @@
+# Ambientes virtuais e variáveis sensíveis
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vscode/
+Plaintext.txt
