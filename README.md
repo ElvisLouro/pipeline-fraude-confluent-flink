@@ -6,6 +6,8 @@ Este projeto consiste em um pipeline robusto de **Event Streaming** e **Stream P
 
 ## 🛠️ Arquitetura e Decisões Técnicas
 
+[ PostgreSQL (Neon) ] ──(CDC / Debezium)──> [ Confluent Cloud Kafka ] ──> [ Flink SQL Engine ] ──> [ Materialized Table / Alertas ]
+
 1. **Banco de Dados Origem (PostgreSQL Serverless no Neon):**
    - **Compatibilidade Nativa:** Opera exatamente como um PostgreSQL padrão, garantindo total suporte a instruções SQL e conectores CDC.
    - **Conectividade Cloud-to-Cloud:** Escolha estratégica de infraestrutura para permitir acesso via TLS/SSL seguro diretamente pelo Confluent Cloud, eliminando a necessidade de túneis locais (como Ngrok).
@@ -40,7 +42,13 @@ GROUP BY
     window_end,
     JSON_VALUE(CAST(val AS STRING), '$.after.conta_id')
 HAVING COUNT(*) >= 2;
+💡 Comportamento do Flink SQL Workspace
+Modo Interativo (SELECT): Utilizado durante o desenvolvimento e os testes dinâmicos para visualização dos blocos e janelas de tempo em tempo real no console do Workspace.
 
+Modo Persistente (CREATE TABLE ... AS SELECT): Ao criar uma Materialized Table, o Flink passa a rodar um job de streaming contínuo em segundo plano (background) persistindo os resultados em um novo tópico Kafka de saída, sem atualizar a grade de pré-visualização imediata da célula.
+
+📁 Estrutura do Repositório
+Plaintext
 pipeline-fraude-confluent-flink/
 ├── .gitignore                  # Arquivos desconsiderados pelo Git (ex: .env)
 ├── README.md                   # Documentação oficial do repositório
@@ -52,37 +60,35 @@ pipeline-fraude-confluent-flink/
 └── SQL/
     ├── 01_schema_postgres.sql         # DDL inicial das tabelas relacionais
     └── 02_alertas_fraude_tumble.sql   # Query de agregação temporal do Flink SQL
+🧪 Como Executar o Projeto Localmente
+Clonar o Repositório:
 
+Bash
 git clone [https://github.com/ElvisLouro/pipeline-fraude-confluent-flink.git](https://github.com/ElvisLouro/pipeline-fraude-confluent-flink.git)
 cd pipeline-fraude-confluent-flink
+Configurar as Variáveis de Ambiente:
+Crie um arquivo .env na raiz do projeto contendo suas credenciais (este arquivo é ignorado pelo Git para segurança):
 
+Ini, TOML
 DB_URI="postgres://usuario:senha@host-neon.l.aivencloud.com:12559/defaultdb?sslmode=require"
+Instalar Dependências:
 
+Bash
 pip install -r requisitos.txt
+Simular Transações:
+Execute o script Python para injetar um lote de eventos no Neon e disparar o fluxo do CDC:
 
+Bash
 python inserir_transacao_teste.py
+Monitorar no Flink SQL:
+Acompanhe o processamento dinâmico das janelas diretamente no editor do Confluent Cloud Workspace.
 
----
 
-<Steps>
-  <Step subtitle="Completar o arquivo" title="Colar o texto no VS Code">
-    Clique na linha 8 no VS Code (logo abaixo de `## 🛠️ Arquitetura e Decisões Técnicas`) e cole[cite: 12]. Pressione `Ctrl + S` para salvar.
-    *Verificação:* O número de linhas do arquivo vai subir de 7 para aproximadamente 100 no VS Code[cite: 12].
-  </Step>
+2. No **VS Code**, coloque o cursor na linha 8 (abaixo de `## 🛠️ Arquitetura e Decisões Técnicas`).
+3. Aperte **`Ctrl + V`** apenas uma vez.
+4. Salve com **`Ctrl + S`**.
 
-  <Step subtitle="Enviar para o GitHub" title="Fazer Push no GitHub Desktop">
-    Abra o GitHub Desktop, faça o **Commit to main** da alteração e clique em **Push origin**.
-    *Verificação:* O botão no topo do GitHub Desktop mudará para *Fetch origin*.
-  </Step>
+*Verificação:* O VS Code vai colar todo o resto instantaneamente de uma vez só! Depois disso é só fazer o commit e push pelo GitHub Desktop.
 
-  <Step subtitle="Validação visual" title="Conferir no Navegador">
-    Atualize a página do GitHub no navegador (`F5`).
-    *Verificação:* Toda a documentação e blocos de código aparecerão completamente renderizados na página.
-  </Step>
-</Steps>
-
-<ElicitationsGroup message="Se precisar de ajuda com a atualização:">
-  <Elicitation label="Subiu tudo no GitHub" query="Colei o texto restante no VS Code, salvei e fiz o push pelo GitHub Desktop. Deu certo no site?"/>
-</ElicitationsGroup>
-
+<FollowUp label="Quer conferir como ficou a página no GitHub após colar tudo e fazer o push?" query="Colei tudo de uma vez no VS Code, salvei e fiz o Push pelo GitHub Desktop. Como confirmo se a página no GitHub ficou completa?"/>
 ```
